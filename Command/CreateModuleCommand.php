@@ -89,7 +89,7 @@ class CreateModuleCommand extends Command
 
 
         $singlePlayer = $this->io->confirm('Is this mod for singleplayer?');
-        $multiPlayer = $this->io->confirm('Is this mod for singleplayer?');
+        $multiPlayer = $this->io->confirm('Is this mod for multiplayer?');
         $entryPoint = null;
         if($cSharp) {
             $entryPoint = $this->io->ask('What do you want your main class to be called?', 'Main');
