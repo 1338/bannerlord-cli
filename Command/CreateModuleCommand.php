@@ -197,7 +197,7 @@ EOF;
         $multiPlayerMode = $xml->addChild('MultiplayerModule');
         $multiPlayerMode->addAttribute('value', ($multiPlayer ? 'true' : 'false'));
         $dependedModules = $xml->addChild('DependedModules');
-        foreach (['Native', 'SandBoxCore', 'SandBox', 'CustomBattle', 'StoryMode'] as $module) {
+        foreach (['Native', 'SandBoxCore', 'Sandbox', 'CustomBattle', 'StoryMode'] as $module) {
             ${'module' . $module} = $dependedModules->addChild('DependedModule');
             ${'module' . $module}->addAttribute('Id', $module);
         }
