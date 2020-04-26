@@ -202,14 +202,14 @@ EOF;
             ${'module' . $module}->addAttribute('Id', $module);
         }
         if($cSharp && $entryPoint) {
-            $subModules = $xml->addChild('Submodules');
-            $subModule = $subModules->addChild('Submodule');
+            $subModules = $xml->addChild('SubModules');
+            $subModule = $subModules->addChild('SubModule');
             $subModuleName = $subModule->addChild('Name');
             $subModuleName->addAttribute('value', $this->modName);
             $dllName = $subModule->addChild('DLLName');
             $dllName->addAttribute('value', $this->modName . '.dll');
             $submoduleClassType = $subModule->addChild('SubModuleClassType');
-            $submoduleClassType->addAttribute('value',$this->modName . '.dll');
+            $submoduleClassType->addAttribute('value', "{$this->modName}.{$entryPoint}");
             $subModuleTags = $subModule->addChild('Tags');
             $tagDedictateServerType = $subModuleTags->addChild('Tag');
             $tagDedictateServerType->addAttribute('key', 'DedicatedServerType');
