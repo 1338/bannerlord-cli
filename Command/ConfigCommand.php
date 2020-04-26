@@ -46,7 +46,7 @@ class ConfigCommand extends Command
         }
         $outConfirmed = false;
         while($outConfirmed == false) {
-            $path = $io->ask('modules path:', $config['folders']['src']);
+            $path = $io->ask('Bannerlord path:', $config['folders']['out']);
             if($io->confirm("confirm path: {$path}")) {
                 $this->config->setOut($path);
                 $outConfirmed = true;

@@ -148,7 +148,7 @@ Global
 	EndGlobalSection
 EndGlobal
 EOF;
-    file_put_contents("{$this->config->get()['folders']['src']}/{$this->modName}/{$this->modName}.sln");
+    file_put_contents("{$this->config->get()['folders']['src']}/{$this->modName}/{$this->modName}.sln", $file);
     }
 
 
@@ -295,9 +295,9 @@ EOF;
 
     private function createProjectFile($entryPoint) {
         $seperator = DIRECTORY_SEPARATOR;
-        $src = $this->config->get()['folders']['out'];
-        $mainBin = $src . $seperator . 'bin' . $seperator . 'Win64_Shipping_Client' . $seperator;
-        $modulePath = $src . $seperator . 'Modules' . $seperator;
+        $path = htmlspecialchars($this->config->get()['folders']['out']);
+        $mainBin = $path . $seperator . 'bin' . $seperator . 'Win64_Shipping_Client' . $seperator;
+        $modulePath = $path . $seperator . 'Modules' . $seperator;
         $file = <<<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">

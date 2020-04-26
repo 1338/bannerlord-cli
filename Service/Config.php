@@ -27,11 +27,11 @@ class Config {
     }
 
     public function setSrc(string $path) {
-        $this->config['folders']['src'] = htmlspecialchars($path);
+        $this->config['folders']['src'] = $path;
     }
 
     public function setOut(string $path) {
-        $this->config['folders']['out'] = htmlspecialchars($path);
+        $this->config['folders']['out'] = $path;
     }
 
     /**
