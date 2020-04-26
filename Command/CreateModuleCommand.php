@@ -61,7 +61,7 @@ class CreateModuleCommand extends Command
             $this->io->writeln('create config first!');
         } else {
             $this->io->writeln('source path: ' . $src);
-            $this->io->writeln('modules path: ' . $out);
+            $this->io->writeln('bannerlord path: ' . $out);
         }
 
 
@@ -106,6 +106,9 @@ class CreateModuleCommand extends Command
                     $this->io->writeln('Couldnt create assembly file');
                     return 1;
                 }
+                if(!$this->createSolutionFile()) {
+
+                }
             }
         }
 
@@ -116,6 +119,36 @@ class CreateModuleCommand extends Command
 
         return 0;
 
+    }
+
+    private function createSolutionFile() {
+        $file = <<<EOF
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{$this->GUIDv4(false)}") = "{$this->modName}", "{$this->modName}\.csproj", "{$this->guid}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{$this->guid}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{$this->guid}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{$this->guid}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{$this->guid}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {$this->GUIDv4(false)}
+	EndGlobalSection
+EndGlobal
+EOF;
+    file_put_contents("{$this->config->get()['folders']['src']}/{$this->modName}/{$this->modName}.sln");
     }
 
 
@@ -137,22 +170,21 @@ class CreateModuleCommand extends Command
             echo 'out dir modname already exists!';
             return false;
         }
-        echo 'We get to create now!';
         $this->fs->mkdir([
-            $config['folders']['src'] . '/' . $this->modName,
+            $config['folders']['src'] . "/{$this->modName}/{$this->modName}",
             $config['folders']['out'] . "/Modules/{$this->modName}"
         ]);
         if($cSharp) {
             $this->fs->mkdir([
                 $config['folders']['out'] . "/Modules/{$this->modName}/bin/Win64_Shipping_Client/",
-                $config['folders']['src'] . "/{$this->modName}/Properties/",
+                $config['folders']['src'] . "/{$this->modName}/{$this->modName}/Properties/",
             ]);
         }
         return true;
     }
 
     private function createSubModuleFile($cSharp = false, $singlePlayer = true, $multiPlayer = false, $entryPoint = null) : bool {
-        $xml_header = '<?xml version="1.0" encoding="UTF-8"?><Module></Module>';
+        $xml_header = '<Module></Module>';
         $xml = new \SimpleXMLElement($xml_header);
         $modName = $xml->addChild('Name');
         $modName->addAttribute('value', $this->modName);
@@ -161,9 +193,9 @@ class CreateModuleCommand extends Command
         $version = $xml->addChild('Version');
         $version->addAttribute('value', 'v1.0.0');
         $singleplayerMode = $xml->addChild('SingleplayerModule');
-        $singleplayerMode->addAttribute('value', $singlePlayer);
+        $singleplayerMode->addAttribute('value', ($singlePlayer ? 'true' : 'false'));
         $multiPlayerMode = $xml->addChild('MultiplayerModule');
-        $multiPlayerMode->addAttribute('value', $multiPlayer);
+        $multiPlayerMode->addAttribute('value', ($multiPlayer ? 'true' : 'false'));
         $dependedModules = $xml->addChild('DependedModules');
         foreach (['Native', 'SandBoxCore', 'SandBox', 'CustomBattle', 'StoryMode'] as $module) {
             ${'module' . $module} = $dependedModules->addChild('DependedModule');
@@ -177,7 +209,7 @@ class CreateModuleCommand extends Command
             $dllName = $subModule->addChild('DLLName');
             $dllName->addAttribute('value', $this->modName . '.dll');
             $submoduleClassType = $subModule->addChild('SubModuleClassType');
-            $submoduleClassType->addAttribute('value',$this->modName . '.' . '.dll');
+            $submoduleClassType->addAttribute('value',$this->modName . '.dll');
             $subModuleTags = $subModule->addChild('Tags');
             $tagDedictateServerType = $subModuleTags->addChild('Tag');
             $tagDedictateServerType->addAttribute('key', 'DedicatedServerType');
@@ -186,7 +218,7 @@ class CreateModuleCommand extends Command
             $tagIsNoRenderModeElement->addAttribute('key', 'IsNoRenderModeElement');
             $tagIsNoRenderModeElement->addAttribute('value', 'false');
         }
-        $xmls = $subModule->addChild('Xmls');
+        $xmls = $xml->addChild('Xmls');
 
         return $xml->saveXML($this->config->get()['folders']['out'] . "/Modules/{$this->modName}/". 'SubModule.xml');
     }
@@ -215,7 +247,7 @@ namespace {$this->modName}
 
 EOF;
 
-        return file_put_contents($this->config->get()['folders']['src'] . "/{$this->modName}/$entryPoint.cs", $file);
+        return file_put_contents($this->config->get()['folders']['src'] . "/{$this->modName}/{$this->modName}/$entryPoint.cs", $file);
 
     }
 
@@ -258,7 +290,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 EOF;
-    return file_put_contents("{$this->config->get()['folders']['src']}/{$this->modName}/Properties/AssemblyInfo.cs", $file);
+    return file_put_contents("{$this->config->get()['folders']['src']}/{$this->modName}/{$this->modName}/Properties/AssemblyInfo.cs", $file);
     }
 
     private function createProjectFile($entryPoint) {
@@ -445,7 +477,7 @@ EOF;
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
 EOF;
-        return file_put_contents($this->config->get()['folders']['src'] . "/{$this->modName}/.csproj", $file);
+        return file_put_contents($this->config->get()['folders']['src'] . "/{$this->modName}/{$this->modName}/.csproj", $file);
     }
 
     public function GUIDv4 ($trim = true)
