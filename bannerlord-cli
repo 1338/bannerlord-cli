@@ -1,0 +1,28 @@
+#!/usr/bin/env php
+<?php
+
+
+require __DIR__.'/vendor/autoload.php';
+
+use Symfony\Component\Console\Application;
+
+
+$application = new Application();
+
+$commands = [
+    'CreateModuleCommand',
+    'ConfigCommand'
+];
+
+$config = new Service\Config(__DIR__.'/config.json');
+
+foreach ($commands as $command) {
+    $className = "Command\\$command";
+    $application->add(new $className($config));
+}
+
+
+try {
+    $application->run();
+} catch (Exception $e) {
+}

@@ -1,0 +1,24 @@
+{
+    "name": "1338/bannerlord-cli",
+    "description": "Create helps with creating/modifying modules",
+    "type": "library",
+    "require": {
+        "symfony/console": "^5.0",
+        "symfony/filesystem": "^5.0",
+        "ext-json": "*",
+        "ext-simplexml": "*"
+    },
+    "require-dev": {
+        "symfony/maker-bundle": "^1.15"
+    },
+    "license": "Beerware",
+    "authors": [{
+        "name": "1338",
+        "email": "maxvandersluis@yahoo.com"
+    }],
+    "autoload": {
+        "psr-4": {
+            "": ""
+        }
+    }
+}
