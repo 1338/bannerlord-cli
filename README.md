@@ -65,7 +65,7 @@ bannerlord path: D:\steam\steamapps\common\Mount & Blade II Bannerlord
  Is this mod for singleplayer? (yes/no) [yes]:
  >
 
- Is this mod for singleplayer? (yes/no) [yes]:
+ Is this mod for multiplayer? (yes/no) [yes]:
  > no
 
  What do you want your main class to be called? [Main]:
