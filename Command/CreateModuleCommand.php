@@ -201,8 +201,8 @@ EOF;
             ${'module' . $module} = $dependedModules->addChild('DependedModule');
             ${'module' . $module}->addAttribute('Id', $module);
         }
+        $subModules = $xml->addChild('SubModules');
         if($cSharp && $entryPoint) {
-            $subModules = $xml->addChild('SubModules');
             $subModule = $subModules->addChild('SubModule');
             $subModuleName = $subModule->addChild('Name');
             $subModuleName->addAttribute('value', $this->modName);
