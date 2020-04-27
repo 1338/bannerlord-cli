@@ -39,11 +39,11 @@ Example:
 ## create mod ##
 To actually create a mod(ule):
 ```
-php bannerlord-cli
+php bannerlord-cli mod:create
 ```
 Or add the mod name at the end
 ```
-php bannerlord-cli TestMod
+php bannerlord-cli mod:create TestMod
 ```
 An example of running through the command:
 ```
@@ -65,7 +65,7 @@ bannerlord path: D:\steam\steamapps\common\Mount & Blade II Bannerlord
  Is this mod for singleplayer? (yes/no) [yes]:
  >
 
- Is this mod for singleplayer? (yes/no) [yes]:
+ Is this mod for multiplayer? (yes/no) [yes]:
  > no
 
  What do you want your main class to be called? [Main]:
