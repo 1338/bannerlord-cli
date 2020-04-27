@@ -39,11 +39,11 @@ Example:
 ## create mod ##
 To actually create a mod(ule):
 ```
-php bannerlord-cli
+php bannerlord-cli mod:create
 ```
 Or add the mod name at the end
 ```
-php bannerlord-cli TestMod
+php bannerlord-cli mod:create TestMod
 ```
 An example of running through the command:
 ```
