@@ -1,222 +1,51 @@
 <?php
 
-namespace Command;
+namespace Service\FileGenerators;
 
-use Service\Config;
-use Service\GUIDGenerator;
-use Service\FileGenerators\AssemblyGenerator;
-use Service\FileGenerators\EntryPointGenerator;
-use Service\FileGenerators\SubmoduleGeneratorXML;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
+class ProjectGenerator {
 
-class CreateModuleCommand extends Command
-{
-    protected static $defaultName = 'mod:create';
-
-    private $modName = '';
-
-    private $title = "Module creation";
-    /** @var Config $config */
-    private  $config;
-    /**
-     * @var Filesystem
-     */
-    private $fs;
-    /**
-     * @var Finder
-     */
-    private $finder;
     /**
      * @var string
      */
-    private $modGUID = '';
+    private $seperator = DIRECTORY_SEPARATOR;
+
     /**
      * @var string
      */
-    private $solutionGUID = '';
+    private $path = '';
+
     /**
      * @var string
      */
     private $projectGUID = '';
-
-
     /**
-     * CreateModuleCommand constructor.
-     * @param Config $config
+     * @var string
      */
-    public function __construct(Config $config)
+    private $entryPoint = '';
+
+    private $references = [];
+
+    public function __construct(string $path, $modName, $projectGUID, $entryPoint)
     {
-        $this->config = $config;
-        $this->fs = new Filesystem();
-        $this->finder = new Finder();
-        $this->modGUID = GUIDGenerator::Generate(false);
-        $this->solutionGUID = GUIDGenerator::Generate(false);
-        $this->projectGUID = GUIDGenerator::Generate(false);
-        parent::__construct();
+
+        $this->references = [
+            [
+                'name'=> 'TaleWorlds.BattlEye.Client',
+                'file' => 'TaleWorlds.BattlEye.Client.dll',
+                'path' => "{$this->seperator}bin{$this->seperator}Win64_Shipping_Client{$this->seperator}"
+            ]
+        ];
     }
 
-    protected function configure()
-    {
-        $this->setDescription('create module')->setHelp('This command allows you to create a module');
-        $this->addArgument('mod_name', InputArgument::OPTIONAL, 'Mod Name');
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output) {
-        $this->io = new SymfonyStyle($input, $output);
-        $this->io->title($this->title);
-
-        $config = $this->config->get();
-
-        $src = $config['folders']['src'];
-        $out = $config['folders']['out'];
-
-        if(!$src || !$out || $src = '' || $out = '') {
-            $this->io->writeln('create config first!');
-        } else {
-            $this->io->writeln('source path: ' . $src);
-            $this->io->writeln('bannerlord path: ' . $out);
-        }
-
-
-        $confirmedModName = false;
-        while($confirmedModName == false) {
-            if($input->getArgument('mod_name')) {
-                if($this->io->confirm("Do you want to name the mod '{$input->getArgument('mod_name')}'?", true)) {
-                    $confirmedModName = $input->getArgument('mod_name');
-                }
-                $input->setArgument('mod_name', false);
-            } else {
-                $modName = $this->io->ask('What do you want the mod name to be?', 'ExampleMod');
-                if($this->io->confirm("Do you want to name the mod '{$modName}'?", true)) {
-                    $confirmedModName = $modName;
-                }
-            }
-        }
-        $this->modName = $confirmedModName;
-        $cSharp = $this->io->confirm('Do you want to use C#?');
-
-        if(!$this->createDirectories($cSharp)) {
-            $this->io->writeln('Couldnt create directories');
-            return 1;
-        }
-
-
-        $singlePlayer = $this->io->confirm('Is this mod for singleplayer?');
-        $multiPlayer = $this->io->confirm('Is this mod for multiplayer?');
-        $entryPoint = null;
-        if($cSharp) {
-            $entryPoint = $this->io->ask('What do you want your main class to be called?', 'Main');
-            if($entryPoint) {
-                $entryPointGenerator = new EntryPointGenerator($this->config->get()['folders']['src'], $this->modName, $entryPoint);
-                if(!$entryPointGenerator->createFile()) {
-                    $this->io->writeln('Could not create class file');
-                    return 1;
-                }
-                if(!$this->createProjectFile($entryPoint)) {
-                    $this->io->writeln('Couldnt create project file');
-                    return 1;
-                }
-                $assemblyGenerator = new AssemblyGenerator($this->config->get()['folders']['src'], $this->modName, $this->modGUID);
-                if(!$assemblyGenerator->createFile()) {
-                    $this->io->writeln('Couldnt create assembly file');
-                    return 1;
-                }
-                if(!$this->createSolutionFile()) {
-
-                }
-            }
-        }
-
-        $submoduleGenerator = new SubmoduleGeneratorXML(
-            $this->config->get()['folders']['out'],
-            $this->modName,
-            true,
-            $singlePlayer,
-            $multiPlayer,
-            $entryPoint
-        );
-        if(!$submoduleGenerator->createFile()) {
-            $this->io->writeln('Could not create submodule.xml file');
-            return 1;
-        }
-
-        return 0;
-
-    }
-
-    private function createSolutionFile() {
-        $file = <<<EOF
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30011.22
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{$this->modGUID}") = "{$this->modName}", "{$this->modName}\.csproj", "{$this->projectGUID}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{$this->modGUID}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{$this->modGUID}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{$this->modGUID}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{$this->modGUID}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {$this->solutionGUID}
-	EndGlobalSection
-EndGlobal
-EOF;
-    file_put_contents("{$this->config->get()['folders']['src']}/{$this->modName}/{$this->modName}.sln", $file);
-    }
-
-
-    private function createDirectories($cSharp = false): bool {
-        $config = $this->config->get();
-        if(!$this->fs->exists($config['folders']['src'])) {
-            echo 'src dir doesnt exists!';
-            return false;
-        }
-        if(!$this->fs->exists($config['folders']['out'])) {
-            echo 'modules dir doesnt exists!';
-            return false;
-        }
-        if($this->fs->exists($config['folders']['src'] . '/' . $this->modName)) {
-            echo 'src dir modname already exists!';
-            return false;
-        }
-        if($this->fs->exists($config['folders']['out'] . "/Modules/{$this->modName}")) {
-            echo 'out dir modname already exists!';
-            return false;
-        }
-        $this->fs->mkdir([
-            $config['folders']['src'] . "/{$this->modName}/{$this->modName}",
-            $config['folders']['out'] . "/Modules/{$this->modName}"
-        ]);
-        if($cSharp) {
-            $this->fs->mkdir([
-                $config['folders']['out'] . "/Modules/{$this->modName}/bin/Win64_Shipping_Client/",
-                $config['folders']['src'] . "/{$this->modName}/{$this->modName}/Properties/",
-            ]);
-        }
-        return true;
-    }
-
-    private function createProjectFile($entryPoint) {
+    public function createFile() {
+        /**
         $seperator = DIRECTORY_SEPARATOR;
         $path = htmlspecialchars($this->config->get()['folders']['out']);
         $mainBin = $path . $seperator . 'bin' . $seperator . 'Win64_Shipping_Client' . $seperator;
         $modulePath = $path . $seperator . 'Modules' . $seperator;
+
+
+
         $file = <<<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -390,12 +219,62 @@ EOF;
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="{$entryPoint}.cs" />
+    <Compile Include="{$this->entryPoint}.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
 EOF;
+         **/
         return file_put_contents($this->config->get()['folders']['src'] . "/{$this->modName}/{$this->modName}/.csproj", $file);
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getPath(): string
+    {
+        return $this->path;
+    }
+
+    /**
+     * @param string $path
+     */
+    public function setPath(string $path): void
+    {
+        $this->path = $path;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProjectGUID(): string
+    {
+        return $this->projectGUID;
+    }
+
+    /**
+     * @param string $projectGUID
+     */
+    public function setProjectGUID(string $projectGUID): void
+    {
+        $this->projectGUID = $projectGUID;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEntryPoint(): string
+    {
+        return $this->entryPoint;
+    }
+
+    /**
+     * @param string $entryPoint
+     */
+    public function setEntryPoint(string $entryPoint): void
+    {
+        $this->entryPoint = $entryPoint;
     }
 }
