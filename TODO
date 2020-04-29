@@ -1,3 +1,23 @@
+[] Commands
+    [] config
+        - Configures bannerlord-cli
+    [] mod:create (ModName)
+        - Create a new mod
+    [] mod:pack (ModName) (Vortex)
+        - automate packing for certain platforms (for example Vortex)
+    [] mod:add:integration (ModName) (ModLib)
+        - automate adding intergration (for example ModLib)
+    [] mod:add:settlement (ModName)
+        - add a settlement to a mod
+    [] mod:add:gui (ModName) -- not sure how to do this yet
+        - add a gui to a mod
+        [] tinker with gui's
+            [] structure
+            [] xml parser
+            [] xml generator
+    [] mod:add:readme
+        - add a standard readme to both the source and out
+    
 [] c#
     [] parser
         [] parse to CSharp object
@@ -34,6 +54,9 @@
         [] Generate based on CSharp, XML and variables
     [] out
         [] Generate based on CSharp, XML and variables
-
+[] packing
+    [] Vortex
+[] intergration
+    [] ModLib
 
 
