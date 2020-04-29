@@ -58,5 +58,6 @@
     [] Vortex
 [] intergration
     [] ModLib
-
+[] config
+    - the config is handled poorly right now, think of a better way to inject the config so that it's available everywhere
 
