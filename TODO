@@ -1,0 +1,39 @@
+[] c#
+    [] parser
+        [] parse to CSharp object
+    [] generator
+        [] generate .cs from CSharp object
+    [] object
+        [] structure
+        [] CSharp
+            [] Namespace
+            [] Class
+            [] Using
+            [] Methods
+                [] name
+                [] return type
+                [] body
+            [] Properties
+                [] Getter -> Method
+                [] Setter -> Method
+[] xml
+    [] parser
+        [] submodule.xml
+        [] .csproj
+        [] ModName.sln
+    [] generator
+        [] submodule.xml
+        [] .csproj
+        [] ModName.sln
+    [] object
+        [] submoduleXML
+        [] CSProject
+        [] Solution
+[] directories
+    [] src
+        [] Generate based on CSharp, XML and variables
+    [] out
+        [] Generate based on CSharp, XML and variables
+
+
+
